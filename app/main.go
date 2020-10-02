@@ -3,7 +3,9 @@ package main
 import (
 	"context"
 	"fmt"
+	"github.com/dchest/uniuri"
 	"io"
+	"io/ioutil"
 	"os"
 	"os/signal"
 	"regexp"
@@ -40,6 +42,7 @@ type cliOpts struct {
 	IncludesPattern string   `short:"p" long:"include-pattern" env:"INCLUDE_PATTERN" env-delim:"," description:"included container names regex pattern"`
 	ExtJSON         bool     `short:"j" long:"json" env:"JSON" description:"wrap message with JSON envelope"`
 	Dbg             bool     `long:"dbg" env:"DEBUG" description:"debug mode"`
+	UniqId          string
 }
 
 var revision = "unknown"
@@ -48,11 +51,13 @@ func main() {
 	fmt.Printf("docker-logger %s\n", revision)
 
 	var opts cliOpts
+	opts.EnableFiles = true
 	if _, err := flags.Parse(&opts); err != nil {
 		os.Exit(1)
 	}
 	setupLog(opts.Dbg)
 
+	opts.UniqId = getUniqueId()
 	ctx, cancel := context.WithCancel(context.Background())
 	go func() { // catch signal and invoke graceful termination
 		stop := make(chan os.Signal, 1)
@@ -66,6 +71,28 @@ func main() {
 	if err := do(ctx, opts); err != nil {
 		log.Printf("[ERROR] failed, %v", err)
 	}
+}
+
+func getUniqueId() string {
+	dat, err := ioutil.ReadFile("/srv/unique/unique")
+	if err != nil {
+		f, erw := os.Create("/srv/unique/unique")
+		if erw != nil {
+			fmt.Printf("Could not create 'unique' file")
+			panic(erw)
+		}
+		defer f.Close()
+
+		uniqId := uniuri.NewLen(16)
+		_, erw2 := f.WriteString(uniqId)
+		if erw2 != nil {
+			fmt.Printf("Could not write 'unique' file")
+			panic(erw2)
+		}
+
+		return uniqId
+	}
+	return string(dat)
 }
 
 func do(ctx context.Context, opts cliOpts) error {

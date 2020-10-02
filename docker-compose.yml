@@ -26,5 +26,6 @@ services:
 
         volumes:
             - ./logs:/srv/logs
+            - ./unique:/srv/unique
             - /var/run/docker.sock:/var/run/docker.sock
        

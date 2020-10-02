@@ -41,5 +41,5 @@ RUN chmod +x /init.sh
 WORKDIR /srv
 
 VOLUME ["/srv/logs"]
-CMD ["/srv/docker-logger"]
+#CMD ["/srv/docker-logger"]
 ENTRYPOINT ["/init.sh"]

@@ -5,6 +5,7 @@ go 1.12
 require (
 	github.com/BurntSushi/toml v0.3.1 // indirect
 	github.com/Microsoft/go-winio v0.4.12 // indirect
+	github.com/dchest/uniuri v0.0.0-20200228104902-7aecb25e1fe5
 	github.com/fsouza/go-dockerclient v1.3.6
 	github.com/go-pkgz/lgr v0.4.0
 	github.com/gogo/protobuf v1.2.1 // indirect
